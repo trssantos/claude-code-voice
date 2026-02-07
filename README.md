@@ -41,25 +41,51 @@ No additional dependencies required (uses CoreAudio).
 
 No additional dependencies required (uses WASAPI).
 
-### Build from source
+### Option 1: Install via cargo (easiest with Rust installed)
+
+Once published to crates.io (recommended):
 
 ```bash
-git clone https://github.com/yourusername/claude-code-voice.git
+cargo install claude-code-voice
+```
+
+Or install directly from git:
+
+```bash
+cargo install --git https://github.com/trssantos/claude-code-voice
+```
+
+**Note:** On Linux, install system dependencies first:
+```bash
+# Ubuntu/Debian
+sudo apt-get install libasound2-dev pkg-config
+```
+
+This will compile and install the binary to `~/.cargo/bin/` automatically.
+
+### Option 2: One-line install script
+
+```bash
+curl -sSL https://raw.githubusercontent.com/trssantos/claude-code-voice/main/install.sh | bash
+```
+
+This script will:
+- Detect your OS and install system dependencies
+- Install Rust if not present
+- Build and install the tool
+- Add it to your PATH
+
+### Option 3: Download pre-built binary (coming soon)
+
+Pre-built binaries will be available from [GitHub Releases](https://github.com/trssantos/claude-code-voice/releases).
+
+### Option 4: Build from source manually
+
+```bash
+git clone https://github.com/trssantos/claude-code-voice.git
 cd claude-code-voice
+./install-deps.sh  # Install system dependencies
 cargo build --release
-```
-
-The binary will be at `target/release/claude-code-voice`.
-
-### Install
-
-```bash
-cargo install --path .
-```
-
-Or copy the binary to your PATH:
-
-```bash
 sudo cp target/release/claude-code-voice /usr/local/bin/
 ```
 

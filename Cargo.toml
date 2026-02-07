@@ -5,7 +5,12 @@ edition = "2021"
 authors = ["Claude Code Voice Contributors"]
 description = "Push-to-talk voice input tool for Claude Code and terminal workflows"
 license = "MIT"
-repository = "https://github.com/yourusername/claude-code-voice"
+repository = "https://github.com/trssantos/claude-code-voice"
+homepage = "https://github.com/trssantos/claude-code-voice"
+documentation = "https://github.com/trssantos/claude-code-voice#readme"
+readme = "README.md"
+keywords = ["voice", "speech-to-text", "whisper", "transcription", "cli"]
+categories = ["command-line-utilities", "accessibility"]
 
 [dependencies]
 # CLI interface
