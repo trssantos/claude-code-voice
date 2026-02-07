@@ -1,0 +1,74 @@
+[package]
+name = "claude-code-voice"
+version = "0.1.0"
+edition = "2021"
+authors = ["Claude Code Voice Contributors"]
+description = "Push-to-talk voice input tool for Claude Code and terminal workflows"
+license = "MIT"
+repository = "https://github.com/trssantos/claude-code-voice"
+homepage = "https://github.com/trssantos/claude-code-voice"
+documentation = "https://github.com/trssantos/claude-code-voice#readme"
+readme = "README.md"
+keywords = ["voice", "speech-to-text", "whisper", "transcription", "cli"]
+categories = ["command-line-utilities", "accessibility"]
+
+[dependencies]
+# CLI interface
+clap = { version = "4.5", features = ["derive"] }
+
+# Audio capture
+cpal = "0.15"
+hound = "3.5"
+
+# Whisper transcription - using whisper-rs
+whisper-rs = "0.11"
+
+# Global hotkey handling
+global-hotkey = "0.5"
+
+# Clipboard and paste simulation
+arboard = "3.4"
+enigo = "0.2"
+
+# Async runtime
+tokio = { version = "1.38", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# HTTP client for model download
+reqwest = { version = "0.12", features = ["blocking", "stream"] }
+
+# File system utilities
+dirs = "5.0"
+tempfile = "3.10"
+
+# CPU detection
+num_cpus = "1.16"
+
+# Signal handling
+signal-hook = "0.3"
+signal-hook-tokio = { version = "0.3", features = ["futures-v0_3"] }
+
+[target.'cfg(unix)'.dependencies]
+daemonize = "0.5"
+nix = { version = "0.29", features = ["signal", "process"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-service = "0.7"
+winapi = { version = "0.3", features = ["winuser"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
