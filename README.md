@@ -65,8 +65,16 @@ This will compile and install the binary to `~/.cargo/bin/` automatically.
 
 ### Option 2: One-line install script
 
+Once merged to main branch:
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/trssantos/claude-code-voice/main/install.sh | bash
+```
+
+Currently on feature branch:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/trssantos/claude-code-voice/claude/voice-input-tool-zC4OD/install.sh | bash
 ```
 
 This script will:
@@ -75,11 +83,7 @@ This script will:
 - Build and install the tool
 - Add it to your PATH
 
-### Option 3: Download pre-built binary (coming soon)
-
-Pre-built binaries will be available from [GitHub Releases](https://github.com/trssantos/claude-code-voice/releases).
-
-### Option 4: Build from source manually
+### Option 3: Build from source manually
 
 ```bash
 git clone https://github.com/trssantos/claude-code-voice.git
@@ -273,6 +277,17 @@ Model performance on typical hardware (approximate):
 | large  | 2.9 GB | 1x (real-time)           | Best    |
 
 *Real-time factor: How much faster than real-time the transcription runs. 32x means 1 second of audio transcribes in ~30ms.*
+
+## Publishing to Package Repositories
+
+Want to make this available via `brew install`, `apt install`, etc.?
+
+See **[PUBLISHING.md](PUBLISHING.md)** for detailed instructions on publishing to:
+- **crates.io** (Rust) - Easiest, takes 5 minutes
+- **Homebrew** (macOS/Linux)
+- **APT** (Ubuntu/Debian via PPA)
+- **AUR** (Arch Linux)
+- **Chocolatey** (Windows)
 
 ## License
 
