@@ -11,6 +11,17 @@ use clap::{Parser, Subcommand};
 use tracing::info;
 use tracing_subscriber;
 
+fn default_hotkey() -> String {
+    #[cfg(target_os = "macos")]
+    {
+        "super+shift+v".to_string()
+    }
+    #[cfg(not(target_os = "macos"))]
+    {
+        "ctrl+shift+space".to_string()
+    }
+}
+
 #[derive(Parser)]
 #[command(name = "claude-code-voice")]
 #[command(about = "Push-to-talk voice input for Claude Code and terminal workflows")]
@@ -32,8 +43,16 @@ enum Commands {
         #[arg(short, long, default_value = "base")]
         model: String,
 
-        /// Global hotkey (e.g., "ctrl+shift+space")
-        #[arg(short = 'k', long, default_value = "ctrl+shift+space")]
+        /// Global hotkey - Format: "modifier+key" (e.g., "super+shift+v")
+        ///
+        /// Modifiers: ctrl, shift, alt, super (⌘ on Mac, ⊞ on Windows)
+        /// Keys: a-z, 0-9, f1-f12, space, enter, tab, etc.
+        ///
+        /// Examples:
+        ///   macOS:    --hotkey "super+shift+v"  (⌘+Shift+V)
+        ///   Linux:    --hotkey "ctrl+alt+v"
+        ///   Windows:  --hotkey "ctrl+shift+v"
+        #[arg(short = 'k', long, default_value_t = default_hotkey())]
         hotkey: String,
     },
 

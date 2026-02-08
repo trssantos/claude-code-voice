@@ -113,15 +113,36 @@ Available models:
 ### 2. Start the daemon
 
 ```bash
+# Start with default hotkey
 claude-code-voice start
+
+# Or customize the hotkey (macOS: use super for Command ⌘)
+claude-code-voice start --hotkey "super+shift+v"
+
+# For debugging, run in foreground
+claude-code-voice start --foreground
 ```
 
-This will start the daemon in the background with the default hotkey `Ctrl+Shift+Space`.
+**Default hotkeys:**
+- **macOS**: `Command ⌘ + Shift + V`
+- **Linux/Windows**: `Ctrl + Shift + Space`
+
+**Custom hotkey examples:**
+```bash
+# macOS
+claude-code-voice start --hotkey "super+shift+r"   # ⌘+Shift+R
+
+# Linux
+claude-code-voice start --hotkey "ctrl+alt+v"
+
+# Windows
+claude-code-voice start --hotkey "ctrl+shift+v"
+```
 
 ### 3. Use voice input
 
 1. Focus on any text input (terminal, editor, browser, etc.)
-2. Press and hold `Ctrl+Shift+Space`
+2. Press and hold your hotkey (e.g., `⌘+Shift+V` on Mac)
 3. Speak your text
 4. Release the hotkey
 5. Your speech will be transcribed and pasted automatically
@@ -163,20 +184,23 @@ claude-code-voice download base
 
 Hotkeys are specified as modifier keys plus a main key, separated by `+`:
 
-```
-ctrl+shift+space
-alt+v
-ctrl+alt+r
-super+space
+**Examples:**
+```bash
+super+shift+v       # ⌘+Shift+V on macOS
+ctrl+shift+space    # Ctrl+Shift+Space on Linux/Windows
+ctrl+alt+r          # Ctrl+Alt+R
+alt+v               # Alt+V
 ```
 
-Supported modifiers:
-- `ctrl` or `control`
-- `shift`
-- `alt`
-- `super`, `meta`, `cmd` (Command on macOS), or `win` (Windows key)
+**Supported modifiers:**
+- `ctrl` or `control` - Control key
+- `shift` - Shift key
+- `alt` - Alt/Option key
+- `super` - Command (⌘) on macOS, Windows (⊞) key on Windows, Super on Linux
 
-Supported keys:
+**Note for macOS users:** Use `super` for the Command (⌘) key, NOT `ctrl`. The Control key on Mac is different from Command.
+
+**Supported keys:**
 - Letters: `a-z`
 - Numbers: `0-9`
 - Function keys: `f1-f12`
@@ -196,9 +220,29 @@ Make sure you have a working microphone connected and configured as the default 
 
 ### Hotkey not working
 
-1. Make sure another application isn't using the same hotkey
-2. Try a different hotkey combination
-3. On Linux, you may need to run with elevated privileges for global hotkeys
+**macOS users:** Make sure you're using `super` for the Command (⌘) key, NOT `ctrl`:
+```bash
+# ✅ Correct - use super for Command key
+claude-code-voice start --hotkey "super+shift+v"
+
+# ❌ Wrong - ctrl on Mac is NOT the Command key
+claude-code-voice start --hotkey "ctrl+shift+v"
+```
+
+**Debug hotkey detection:**
+1. Run in foreground mode with debug logging:
+   ```bash
+   RUST_LOG=debug claude-code-voice start --foreground
+   ```
+2. Press your hotkey - you should see "Hotkey pressed!" in the logs
+3. If you see no events, the hotkey isn't being detected (try a different one)
+
+**Common issues:**
+1. Another application is using the same hotkey (check system preferences)
+2. System shortcuts conflict (macOS: System Preferences → Keyboard → Shortcuts)
+3. Try a different hotkey combination
+4. On Linux, you may need to run with elevated privileges for global hotkeys
+5. Make sure the application is actually running (`claude-code-voice status`)
 
 ### Transcription is slow
 

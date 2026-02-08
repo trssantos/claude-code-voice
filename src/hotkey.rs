@@ -6,7 +6,7 @@ use global_hotkey::{
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tokio::time::{sleep, Duration};
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 
 pub struct HotkeyManager {
     manager: GlobalHotKeyManager,
@@ -35,8 +35,10 @@ impl HotkeyManager {
     pub async fn wait_for_press(&self) -> Result<()> {
         loop {
             if let Ok(event) = GlobalHotKeyEvent::receiver().try_recv() {
+                debug!("Hotkey event received: id={:?}, state={:?}", event.id, event.state);
                 if event.id == self.hotkey.id() && event.state == global_hotkey::HotKeyState::Pressed
                 {
+                    info!("Hotkey pressed!");
                     self.is_pressed.store(true, Ordering::SeqCst);
                     return Ok(());
                 }
@@ -48,9 +50,11 @@ impl HotkeyManager {
     pub async fn wait_for_release(&self) -> Result<()> {
         loop {
             if let Ok(event) = GlobalHotKeyEvent::receiver().try_recv() {
+                debug!("Hotkey event received: id={:?}, state={:?}", event.id, event.state);
                 if event.id == self.hotkey.id()
                     && event.state == global_hotkey::HotKeyState::Released
                 {
+                    info!("Hotkey released!");
                     self.is_pressed.store(false, Ordering::SeqCst);
                     return Ok(());
                 }
