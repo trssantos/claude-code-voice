@@ -1,6 +1,5 @@
 use anyhow::{Context, Result};
-use std::path::PathBuf;
-use tracing::{info, warn};
+use tracing::info;
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextParameters};
 
 pub struct Transcriber {

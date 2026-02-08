@@ -1,7 +1,6 @@
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
 use tracing::{info, warn};
 
 fn get_pid_file() -> Result<PathBuf> {
@@ -170,7 +169,8 @@ async fn is_running() -> Result<bool> {
         use nix::sys::signal::{kill, Signal};
         use nix::unistd::Pid;
 
-        match kill(Pid::from_raw(pid as i32), Signal::from_c_int(0).unwrap()) {
+        // Send signal 0 to check if process exists (doesn't actually send a signal)
+        match kill(Pid::from_raw(pid as i32), None) {
             Ok(_) => Ok(true),
             Err(_) => {
                 // Process not running, clean up PID file

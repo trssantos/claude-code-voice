@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
-use tracing::{info, warn};
+use tracing::info;
 
 const MODEL_BASE_URL: &str = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main";
 

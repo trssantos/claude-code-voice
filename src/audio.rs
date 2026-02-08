@@ -2,11 +2,12 @@ use anyhow::{Context, Result};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use cpal::{Device, SampleFormat, Stream, StreamConfig};
 use std::sync::{Arc, Mutex};
-use tracing::{info, warn};
+use tracing::info;
 
 pub struct AudioCapturer {
     device: Device,
     config: StreamConfig,
+    sample_format: SampleFormat,
 }
 
 impl AudioCapturer {
@@ -18,20 +19,24 @@ impl AudioCapturer {
 
         info!("Using audio input device: {}", device.name()?);
 
-        let config = device
+        let supported_config = device
             .default_input_config()
             .context("Failed to get default input config")?;
 
+        let sample_format = supported_config.sample_format();
+        let config: StreamConfig = supported_config.into();
+
         info!(
             "Audio config: {} Hz, {} channels, {:?}",
-            config.sample_rate().0,
-            config.channels(),
-            config.sample_format()
+            config.sample_rate.0,
+            config.channels,
+            sample_format
         );
 
         Ok(Self {
             device,
-            config: config.into(),
+            config,
+            sample_format,
         })
     }
 
@@ -42,15 +47,11 @@ impl AudioCapturer {
         let samples = Arc::new(Mutex::new(Vec::new()));
         let samples_clone = samples.clone();
 
-        let err_fn = |err| {
-            warn!("Audio stream error: {}", err);
-        };
-
-        // Build the audio stream
-        let stream = match self.config.sample_format() {
-            SampleFormat::F32 => self.build_stream::<f32>(samples_clone, err_fn)?,
-            SampleFormat::I16 => self.build_stream::<i16>(samples_clone, err_fn)?,
-            SampleFormat::U16 => self.build_stream::<u16>(samples_clone, err_fn)?,
+        // Build the audio stream based on sample format
+        let stream = match self.sample_format {
+            SampleFormat::F32 => self.build_stream::<f32>(samples_clone)?,
+            SampleFormat::I16 => self.build_stream::<i16>(samples_clone)?,
+            SampleFormat::U16 => self.build_stream::<u16>(samples_clone)?,
             format => anyhow::bail!("Unsupported sample format: {:?}", format),
         };
 
@@ -73,10 +74,9 @@ impl AudioCapturer {
     fn build_stream<T>(
         &self,
         samples: Arc<Mutex<Vec<f32>>>,
-        err_fn: impl FnMut(cpal::StreamError) + Send + 'static,
     ) -> Result<Stream>
     where
-        T: cpal::Sample + cpal::SizedSample,
+        T: cpal::Sample + cpal::SizedSample + ToFloatSample,
     {
         let config = self.config.clone();
 
@@ -85,10 +85,12 @@ impl AudioCapturer {
             move |data: &[T], _: &cpal::InputCallbackInfo| {
                 let mut samples = samples.lock().unwrap();
                 for &sample in data {
-                    samples.push(sample.to_float_sample());
+                    samples.push(sample.to_f32());
                 }
             },
-            err_fn,
+            |err| {
+                eprintln!("Audio stream error: {}", err);
+            },
             None,
         )?;
 
@@ -98,23 +100,23 @@ impl AudioCapturer {
 
 // Helper trait to convert samples to f32
 trait ToFloatSample {
-    fn to_float_sample(&self) -> f32;
+    fn to_f32(&self) -> f32;
 }
 
 impl ToFloatSample for f32 {
-    fn to_float_sample(&self) -> f32 {
+    fn to_f32(&self) -> f32 {
         *self
     }
 }
 
 impl ToFloatSample for i16 {
-    fn to_float_sample(&self) -> f32 {
+    fn to_f32(&self) -> f32 {
         *self as f32 / i16::MAX as f32
     }
 }
 
 impl ToFloatSample for u16 {
-    fn to_float_sample(&self) -> f32 {
+    fn to_f32(&self) -> f32 {
         (*self as f32 - 32768.0) / 32768.0
     }
 }
