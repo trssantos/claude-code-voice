@@ -33,6 +33,9 @@ impl HotkeyManager {
     }
 
     pub async fn wait_for_press(&self) -> Result<()> {
+        info!("Waiting for hotkey press... (polling every 10ms)");
+        let mut poll_count = 0;
+
         loop {
             if let Ok(event) = GlobalHotKeyEvent::receiver().try_recv() {
                 debug!("Hotkey event received: id={:?}, state={:?}", event.id, event.state);
@@ -43,6 +46,12 @@ impl HotkeyManager {
                     return Ok(());
                 }
             }
+
+            poll_count += 1;
+            if poll_count % 1000 == 0 {
+                debug!("Still waiting for hotkey... ({}s)", poll_count / 100);
+            }
+
             sleep(Duration::from_millis(10)).await;
         }
     }
