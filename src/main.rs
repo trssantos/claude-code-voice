@@ -8,7 +8,7 @@ mod transcription;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use tracing::{error, info};
+use tracing::info;
 use tracing_subscriber;
 
 #[derive(Parser)]
@@ -122,7 +122,7 @@ async fn run_voice_input(config: config::Config) -> Result<()> {
     let audio_capturer = audio::AudioCapturer::new()?;
 
     // Initialize clipboard handler
-    let clipboard_handler = clipboard::ClipboardHandler::new()?;
+    let mut clipboard_handler = clipboard::ClipboardHandler::new()?;
 
     // Set up hotkey
     let hotkey_manager = hotkey::HotkeyManager::new(&config.hotkey)?;
