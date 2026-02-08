@@ -35,7 +35,21 @@ sudo pacman -S alsa-lib
 
 #### macOS
 
-No additional dependencies required (uses CoreAudio).
+**⚠️ IMPORTANT: Accessibility Permissions Required**
+
+macOS requires apps to have Accessibility permissions to use global hotkeys.
+
+**Before using, grant permissions:**
+
+1. Open **System Settings → Privacy & Security → Accessibility**
+2. Click the **`+`** button (or unlock with 🔒)
+3. Add your terminal app: `/Applications/Utilities/Terminal.app` (or iTerm2)
+4. Enable the checkbox ✅
+5. **Restart your terminal** completely
+
+Without these permissions, hotkeys will not work (registration succeeds but events are never received).
+
+No additional system dependencies required (uses CoreAudio).
 
 #### Windows
 
@@ -110,7 +124,18 @@ Available models:
 - `medium`: High accuracy, much slower (~1.5GB)
 - `large`: Best accuracy, very slow (~2.9GB)
 
-### 2. Start the daemon
+### 2. macOS Only: Grant Accessibility Permissions
+
+**⚠️ macOS users: This step is REQUIRED for hotkeys to work!**
+
+1. **System Settings → Privacy & Security → Accessibility**
+2. Click **`+`** and add `/Applications/Utilities/Terminal.app` (or your terminal)
+3. Enable the checkbox ✅
+4. **Restart your terminal**
+
+Skip this step on Linux/Windows.
+
+### 3. Start the daemon
 
 ```bash
 # Start with default hotkey
@@ -139,7 +164,7 @@ claude-code-voice start --hotkey "ctrl+alt+v"
 claude-code-voice start --hotkey "ctrl+shift+v"
 ```
 
-### 3. Use voice input
+### 4. Use voice input
 
 1. Focus on any text input (terminal, editor, browser, etc.)
 2. Press and hold your hotkey (e.g., `⌘+Shift+V` on Mac)
@@ -147,7 +172,7 @@ claude-code-voice start --hotkey "ctrl+shift+v"
 4. Release the hotkey
 5. Your speech will be transcribed and pasted automatically
 
-### 4. Stop the daemon
+### 5. Stop the daemon
 
 ```bash
 claude-code-voice stop
