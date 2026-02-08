@@ -4,7 +4,6 @@ use whisper_rs::{FullParams, SamplingStrategy, WhisperContext, WhisperContextPar
 
 pub struct Transcriber {
     ctx: WhisperContext,
-    sample_rate: i32,
 }
 
 impl Transcriber {
@@ -29,10 +28,7 @@ impl Transcriber {
 
         info!("Whisper model loaded successfully");
 
-        Ok(Self {
-            ctx,
-            sample_rate: 16000, // Whisper expects 16kHz
-        })
+        Ok(Self { ctx })
     }
 
     pub async fn transcribe(&self, audio_samples: &[f32]) -> Result<String> {

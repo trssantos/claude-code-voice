@@ -6,13 +6,3 @@ pub struct Config {
     pub hotkey: String,
     pub foreground: bool,
 }
-
-impl Config {
-    pub fn new(model_size: String, hotkey: String, foreground: bool) -> Self {
-        Self {
-            model_size,
-            hotkey,
-            foreground,
-        }
-    }
-}

@@ -166,7 +166,7 @@ async fn is_running() -> Result<bool> {
     // Check if process is actually running
     #[cfg(unix)]
     {
-        use nix::sys::signal::{kill, Signal};
+        use nix::sys::signal::kill;
         use nix::unistd::Pid;
 
         // Send signal 0 to check if process exists (doesn't actually send a signal)

@@ -64,10 +64,6 @@ impl HotkeyManager {
             sleep(Duration::from_millis(10)).await;
         }
     }
-
-    pub fn is_pressed(&self) -> bool {
-        self.is_pressed.load(Ordering::SeqCst)
-    }
 }
 
 impl Drop for HotkeyManager {
