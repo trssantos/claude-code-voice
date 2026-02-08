@@ -80,15 +80,3 @@ pub async fn download_model(model_size: &str) -> Result<()> {
     info!("Model downloaded successfully");
     Ok(())
 }
-
-pub fn validate_model_size(model_size: &str) -> Result<()> {
-    let valid_sizes = ["tiny", "base", "small", "medium", "large"];
-    if !valid_sizes.contains(&model_size) {
-        anyhow::bail!(
-            "Invalid model size '{}'. Valid sizes: {:?}",
-            model_size,
-            valid_sizes
-        );
-    }
-    Ok(())
-}

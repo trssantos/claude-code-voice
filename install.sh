@@ -114,15 +114,20 @@ setup_path() {
 
 # Download base model
 download_model() {
+    echo ""
     info "Would you like to download the base Whisper model now? (~142MB)"
-    read -p "Download model? [Y/n] " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]] || [[ -z $REPLY ]]; then
+    echo -n "Download model? [Y/n] "
+
+    # Read from /dev/tty to handle piped input
+    read -r response < /dev/tty || response=""
+
+    if [[ -z "$response" ]] || [[ "$response" =~ ^[Yy]$ ]]; then
         info "Downloading base model..."
         "$BINARY_NAME" download base || warn "Model download failed. You can download it later with: $BINARY_NAME download base"
     else
         info "Skipping model download. Download later with: $BINARY_NAME download base"
     fi
+    echo ""
 }
 
 # Main installation flow
