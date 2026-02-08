@@ -206,6 +206,40 @@ alt+v               # Alt+V
 - Function keys: `f1-f12`
 - Special: `space`, `enter`, `tab`, `backspace`, `escape`
 
+## Updating
+
+To update to the latest version:
+
+### Option 1: Re-run install script (easiest)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/trssantos/claude-code-voice/claude/voice-input-tool-zC4OD/install.sh | bash
+```
+
+The script will automatically replace the old version.
+
+### Option 2: Update via cargo
+
+```bash
+cargo install --git https://github.com/trssantos/claude-code-voice --branch claude/voice-input-tool-zC4OD --force
+```
+
+The `--force` flag replaces the existing installation.
+
+### Option 3: Update from source
+
+```bash
+cd /path/to/claude-code-voice
+git pull
+cargo install --path . --force
+```
+
+**Note:** After updating, restart the daemon:
+```bash
+claude-code-voice stop
+claude-code-voice start
+```
+
 ## Configuration
 
 Models are stored in `~/.claude-code-voice/models/`
