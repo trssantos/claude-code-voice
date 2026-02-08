@@ -1,10 +1,18 @@
 mod audio;
 mod clipboard;
 mod config;
-mod daemon;
-mod hotkey;
 mod model;
 mod transcription;
+
+// Platform-specific modules
+#[cfg(target_os = "macos")]
+mod macos;
+
+#[cfg(not(target_os = "macos"))]
+mod daemon;
+
+#[cfg(not(target_os = "macos"))]
+mod hotkey;
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -88,37 +96,71 @@ async fn main() -> Result<()> {
             model,
             hotkey,
         } => {
-            info!("Starting claude-code-voice daemon");
+            #[cfg(target_os = "macos")]
+            {
+                info!("Starting macOS menu bar app");
 
-            // Ensure model is downloaded
-            if !model::is_model_downloaded(&model).await? {
-                info!("Model '{}' not found. Downloading...", model);
-                model::download_model(&model).await?;
+                // Ensure model is downloaded
+                if !model::is_model_downloaded(&model).await? {
+                    info!("Model '{}' not found. Downloading...", model);
+                    model::download_model(&model).await?;
+                }
+
+                // On macOS, ignore foreground flag - always run as menu bar app
+                macos::run_menu_bar_app(model, hotkey)?;
             }
 
-            let config = config::Config {
-                model_size: model,
-                hotkey,
-                foreground,
-            };
+            #[cfg(not(target_os = "macos"))]
+            {
+                info!("Starting claude-code-voice daemon");
 
-            if foreground {
-                info!("Running in foreground mode");
-                run_voice_input(config).await?;
-            } else {
-                info!("Starting daemon");
-                daemon::start_daemon(config).await?;
+                // Ensure model is downloaded
+                if !model::is_model_downloaded(&model).await? {
+                    info!("Model '{}' not found. Downloading...", model);
+                    model::download_model(&model).await?;
+                }
+
+                let config = config::Config {
+                    model_size: model,
+                    hotkey,
+                    foreground,
+                };
+
+                if foreground {
+                    info!("Running in foreground mode");
+                    run_voice_input(config).await?;
+                } else {
+                    info!("Starting daemon");
+                    daemon::start_daemon(config).await?;
+                }
             }
         }
 
         Commands::Stop => {
-            info!("Stopping claude-code-voice daemon");
-            daemon::stop_daemon().await?;
+            #[cfg(target_os = "macos")]
+            {
+                println!("On macOS, use the menu bar icon to quit the app");
+            }
+
+            #[cfg(not(target_os = "macos"))]
+            {
+                info!("Stopping claude-code-voice daemon");
+                daemon::stop_daemon().await?;
+            }
         }
 
         Commands::Status => {
-            let status = daemon::get_status().await?;
-            println!("{}", status);
+            #[cfg(target_os = "macos")]
+            {
+                println!("On macOS, the app runs as a menu bar application");
+                println!("Look for the icon in your menu bar");
+            }
+
+            #[cfg(not(target_os = "macos"))]
+            {
+                let status = daemon::get_status().await?;
+                println!("{}", status);
+            }
         }
 
         Commands::Download { model } => {
@@ -131,6 +173,7 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(target_os = "macos"))]
 async fn run_voice_input(config: config::Config) -> Result<()> {
     info!("Initializing voice input with model: {}", config.model_size);
 

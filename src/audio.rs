@@ -71,7 +71,7 @@ impl AudioCapturer {
         Ok(captured_samples)
     }
 
-    fn build_stream<T>(
+    pub fn build_stream<T>(
         &self,
         samples: Arc<Mutex<Vec<f32>>>,
     ) -> Result<Stream>
