@@ -61,7 +61,6 @@ signal-hook-tokio = { version = "0.3", features = ["futures-v0_3"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 # macOS menu bar app
-tao = { version = "0.16", features = ["tray"] }
 tray-icon = "0.14"
 cocoa = "0.25"
 objc = "0.2"
