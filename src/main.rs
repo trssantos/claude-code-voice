@@ -92,7 +92,7 @@ async fn main() -> Result<()> {
 
     match cli.command {
         Commands::Start {
-            foreground,
+            foreground: _,
             model,
             hotkey,
         } => {

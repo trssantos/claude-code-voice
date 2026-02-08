@@ -1,9 +1,5 @@
 use anyhow::{Context, Result};
-use cocoa::appkit::NSEvent;
-use cocoa::base::{id, nil};
-use cocoa::foundation::NSAutoreleasePool;
-use core_foundation::runloop::{kCFRunLoopCommonModes, CFRunLoop};
-use core_graphics::event::{CGEvent, CGEventFlags, CGEventTap, CGEventTapLocation, CGEventTapOptions, CGEventTapPlacement, CGEventType, EventField};
+use core_graphics::event::{CGEvent, CGEventFlags, EventField};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tracing::{debug, info};

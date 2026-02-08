@@ -66,6 +66,7 @@ cocoa = "0.25"
 objc = "0.2"
 core-foundation = "0.9"
 core-graphics = "0.23"
+foreign-types-shared = "0.3"
 
 [target.'cfg(all(unix, not(target_os = "macos")))'.dependencies]
 # Linux daemon support

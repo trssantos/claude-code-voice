@@ -1,7 +1,8 @@
 use anyhow::Result;
 use core_foundation::runloop::{kCFRunLoopCommonModes, CFRunLoop};
-use core_graphics::event::{CGEvent, CGEventTap, CGEventTapCallBack, CGEventTapLocation, CGEventTapOptions, CGEventTapPlacement, CGEventType};
-use std::sync::{Arc, Mutex};
+use core_graphics::event::{CGEvent, CGEventTap, CGEventTapLocation, CGEventTapOptions, CGEventTapPlacement, CGEventType};
+use foreign_types_shared::ForeignType;
+use std::sync::Arc;
 use tracing::{error, info};
 use tray_icon::{menu::Menu, TrayIconBuilder};
 
@@ -44,10 +45,7 @@ pub fn run_menu_bar_app(model_size: String, hotkey_str: String) -> Result<()> {
     info!("Starting event loop...");
 
     // Run the main event loop
-    unsafe {
-        let run_loop = CFRunLoop::get_current();
-        CFRunLoop::run_current();
-    }
+    CFRunLoop::run_current();
 
     Ok(())
 }
@@ -130,62 +128,60 @@ async fn capture_while_pressed(
 }
 
 fn install_event_tap(hotkey_manager: Arc<MacOSHotkeyManager>) -> Result<()> {
-    use std::os::raw::c_void;
+    let event_types = vec![CGEventType::KeyDown, CGEventType::KeyUp];
 
-    unsafe {
-        let event_mask = (1 << CGEventType::KeyDown as u64) | (1 << CGEventType::KeyUp as u64);
+    let hotkey_clone = hotkey_manager.clone();
 
-        // Create event tap callback
-        let hotkey_ptr = Arc::into_raw(hotkey_manager.clone()) as *mut c_void;
-
-        extern "C" fn event_callback(
-            _proxy: *mut c_void,
-            event_type: u32,
-            event: *mut c_void,
-            user_info: *mut c_void,
-        ) -> *mut c_void {
-            unsafe {
-                let hotkey_manager = &*(user_info as *const MacOSHotkeyManager);
-                let cg_event = CGEvent::from_ptr(event as *mut _);
-
-                if event_type == CGEventType::KeyDown as u32 {
-                    if hotkey_manager.matches_event(&cg_event) {
-                        hotkey_manager.set_pressed(true);
-                    }
-                } else if event_type == CGEventType::KeyUp as u32 {
-                    if hotkey_manager.matches_event(&cg_event) {
-                        hotkey_manager.set_pressed(false);
-                    }
+    let callback = move |_proxy: core_graphics::event::CGEventTapProxy,
+                         event_type: CGEventType,
+                         event: &CGEvent|
+          -> Option<CGEvent> {
+        match event_type {
+            CGEventType::KeyDown => {
+                if hotkey_clone.matches_event(event) {
+                    hotkey_clone.set_pressed(true);
                 }
-
-                event
             }
+            CGEventType::KeyUp => {
+                if hotkey_clone.matches_event(event) {
+                    hotkey_clone.set_pressed(false);
+                }
+            }
+            _ => {}
         }
 
-        let tap = CGEventTap::new(
-            CGEventTapLocation::HID,
-            CGEventTapPlacement::HeadInsertEventTap,
-            CGEventTapOptions::Default,
-            event_mask,
-            event_callback,
-            hotkey_ptr,
-        ).ok_or_else(|| anyhow::anyhow!(
+        // Return the event unmodified
+        Some(unsafe { CGEvent::from_ptr(event.as_ptr()) })
+    };
+
+    let tap = CGEventTap::new(
+        CGEventTapLocation::HID,
+        CGEventTapPlacement::HeadInsertEventTap,
+        CGEventTapOptions::Default,
+        event_types,
+        callback,
+    )
+    .map_err(|_| {
+        anyhow::anyhow!(
             "Failed to create event tap. Make sure Accessibility permissions are granted.\n\
              Go to System Settings → Privacy & Security → Accessibility and add Terminal.app"
-        ))?;
+        )
+    })?;
 
-        let loop_source = tap.mach_port.create_runloop_source(0)
-            .map_err(|e| anyhow::anyhow!("Failed to create run loop source: {}", e))?;
+    let loop_source = tap
+        .mach_port
+        .create_runloop_source(0)
+        .map_err(|e| anyhow::anyhow!("Failed to create run loop source: {}", e))?;
 
-        let current_loop = CFRunLoop::get_current();
-        current_loop.add_source(&loop_source, unsafe { kCFRunLoopCommonModes });
-        tap.enable();
+    let current_loop = CFRunLoop::get_current();
+    current_loop.add_source(&loop_source, unsafe { kCFRunLoopCommonModes });
+    tap.enable();
 
-        info!("Event tap installed successfully");
+    info!("Event tap installed successfully");
 
-        // Prevent the Arc from being dropped
-        std::mem::forget(hotkey_manager);
-    }
+    // Prevent the tap from being dropped
+    std::mem::forget(tap);
+    std::mem::forget(hotkey_manager);
 
     Ok(())
 }

@@ -40,6 +40,7 @@ impl AudioCapturer {
         })
     }
 
+    #[cfg(not(target_os = "macos"))]
     pub async fn capture_while_held(
         &self,
         hotkey_manager: &crate::hotkey::HotkeyManager,
